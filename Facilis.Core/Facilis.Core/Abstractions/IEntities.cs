@@ -25,13 +25,13 @@ namespace Facilis.Core.Abstractions
 
         T[] Update(IEnumerable<T> entities);
 
-        void AddNoSave(params T[] attributes);
+        void AddNoSave(params T[] entities);
 
-        void AddNoSave(IEnumerable<T> attributes);
+        void AddNoSave(IEnumerable<T> entities);
 
-        void UpdateNoSave(params T[] attributes);
+        void UpdateNoSave(params T[] entities);
 
-        void UpdateNoSave(IEnumerable<T> attributes);
+        void UpdateNoSave(IEnumerable<T> entities);
 
         void Save();
     }
