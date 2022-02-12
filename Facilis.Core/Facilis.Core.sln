@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Facilis.Core", "Facilis.Core\Facilis.Core.csproj", "{9B3E839F-875D-4E20-A26C-706F62401536}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9B3E839F-875D-4E20-A26C-706F62401536}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B3E839F-875D-4E20-A26C-706F62401536}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B3E839F-875D-4E20-A26C-706F62401536}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B3E839F-875D-4E20-A26C-706F62401536}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {78EC7A9B-70D2-49F9-A1E5-BE76AB5AB2A9}
+	EndGlobalSection
+EndGlobal
