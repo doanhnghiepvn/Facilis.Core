@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Facilis.Core.Abstractions
 {
-    public interface IEntities<T> where T : IEntityWithId
+    public interface IEntitiesWithId<T> where T : IEntityWithId
     {
         IQueryable<T> Entities { get; }
 
