@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Facilis.Core.EntityFrameworkCore
 {
-    public class EntitiesWithoutStatus<T> : IEntitiesWithId<T>
+    public class EntitiesWithId<T> : IEntitiesWithId<T>
         where T : class, IEntityWithId
     {
         private DbContext context { get; }
@@ -17,7 +17,7 @@ namespace Facilis.Core.EntityFrameworkCore
 
         #region Constructor(s)
 
-        public EntitiesWithoutStatus(DbContext context)
+        public EntitiesWithId(DbContext context)
         {
             this.context = context;
         }
