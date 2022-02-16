@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Facilis.Core.EntityFrameworkCore
 {
@@ -41,6 +42,16 @@ namespace Facilis.Core.EntityFrameworkCore
         public virtual T[] Add(IEnumerable<T> entities)
         {
             return this.Add(entities.ToArray());
+        }
+
+        public virtual IQueryable<T> Where(Expression<Func<T, bool>> expression)
+        {
+            if (expression is null)
+            {
+                throw new ArgumentNullException(nameof(expression));
+            }
+
+            return this.Rows.Where(expression);
         }
 
         public virtual void AddNoSave(params T[] entities)

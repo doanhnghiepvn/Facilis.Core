@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Facilis.Core.Abstractions
 {
@@ -12,6 +14,8 @@ namespace Facilis.Core.Abstractions
         T[] FindByIds(params string[] ids);
 
         T[] FindByIds(IEnumerable<string> ids);
+
+        IQueryable<T> Where(Expression<Func<T, bool>> expression);
 
         T Add(T entity);
 
