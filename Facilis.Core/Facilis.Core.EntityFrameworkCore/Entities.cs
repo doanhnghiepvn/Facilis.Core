@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Facilis.Core.EntityFrameworkCore
 {
-    public class Entities<T> : EntitiesWithoutStatus<T>, IEntitiesWithStatus<T>
+    public class Entities<T> : EntitiesWithId<T>, IEntities<T>
         where T : class, IEntityWithId, IEntityWithStatus
     {
         #region Constructor(s)
