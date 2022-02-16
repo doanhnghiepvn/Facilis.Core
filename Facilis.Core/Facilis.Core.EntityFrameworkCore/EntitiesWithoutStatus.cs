@@ -6,14 +6,14 @@ using System.Linq;
 
 namespace Facilis.Core.EntityFrameworkCore
 {
-    public class EntitiesWithoutStatus<T> : IEntities<T>
+    public class EntitiesWithoutStatus<T> : IEntitiesWithId<T>
         where T : class, IEntityWithId
     {
         private DbContext context { get; }
 
         protected virtual DbSet<T> Set => this.context.Set<T>();
 
-        public virtual IQueryable<T> Entities => this.Set;
+        public virtual IQueryable<T> Rows => this.Set;
 
         #region Constructor(s)
 
@@ -55,13 +55,13 @@ namespace Facilis.Core.EntityFrameworkCore
 
         public virtual T FindById(string id)
         {
-            return this.Entities
+            return this.Rows
                 .FirstOrDefault(entity => entity.Id == id);
         }
 
         public virtual T[] FindByIds(params string[] ids)
         {
-            return this.Entities.Where(entity => ids.Contains(entity.Id)).ToArray();
+            return this.Rows.Where(entity => ids.Contains(entity.Id)).ToArray();
         }
 
         public virtual T[] FindByIds(IEnumerable<string> ids)

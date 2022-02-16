@@ -5,7 +5,7 @@ namespace Facilis.Core.Abstractions
 {
     public interface IEntitiesWithId<T> where T : IEntityWithId
     {
-        IQueryable<T> Entities { get; }
+        IQueryable<T> Rows { get; }
 
         T FindById(string id);
 
