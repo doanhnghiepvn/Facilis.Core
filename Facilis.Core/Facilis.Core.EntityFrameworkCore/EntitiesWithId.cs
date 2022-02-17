@@ -115,5 +115,10 @@ namespace Facilis.Core.EntityFrameworkCore
         {
             this.UpdateNoSave(entities.ToArray());
         }
+
+        public virtual void Dispose()
+        {
+            this.context.Dispose();
+        }
     }
 }

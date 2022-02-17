@@ -5,7 +5,8 @@ using System.Linq.Expressions;
 
 namespace Facilis.Core.Abstractions
 {
-    public interface IEntitiesWithId<T> where T : IEntityWithId
+    public interface IEntitiesWithId<T> : IDisposable
+        where T : IEntityWithId
     {
         IQueryable<T> Rows { get; }
 
