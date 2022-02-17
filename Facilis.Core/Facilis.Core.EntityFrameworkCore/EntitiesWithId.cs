@@ -32,7 +32,7 @@ namespace Facilis.Core.EntityFrameworkCore
             return entity;
         }
 
-        public virtual T[] Add(T[] entities)
+        public virtual T[] Add(params T[] entities)
         {
             this.Set.AddRange(entities);
             this.context.SaveChanges();
@@ -93,7 +93,7 @@ namespace Facilis.Core.EntityFrameworkCore
             return entity;
         }
 
-        public virtual T[] Update(T[] entities)
+        public virtual T[] Update(params T[] entities)
         {
             this.Set.UpdateRange(entities);
             this.context.SaveChanges();

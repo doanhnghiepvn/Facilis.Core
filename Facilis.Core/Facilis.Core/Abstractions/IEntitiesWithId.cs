@@ -19,13 +19,13 @@ namespace Facilis.Core.Abstractions
 
         T Add(T entity);
 
-        T[] Add(T[] entities);
+        T[] Add(params T[] entities);
 
         T[] Add(IEnumerable<T> entities);
 
         T Update(T entity);
 
-        T[] Update(T[] entities);
+        T[] Update(params T[] entities);
 
         T[] Update(IEnumerable<T> entities);
 
