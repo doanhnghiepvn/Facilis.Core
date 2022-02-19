@@ -54,6 +54,14 @@ namespace Facilis.ToDoApp.Controllers
                 Ok() : NotFound();
         }
 
+        [HttpDelete]
+        [Route("{id}")]
+        public IActionResult Delete(string id)
+        {
+            return this.UpdateStatus(id, StatusTypes.Deleted) ?
+                Ok() : NotFound();
+        }
+
         private bool UpdateStatus(string id, StatusTypes status)
         {
             var item = this.items.FindById(id);
