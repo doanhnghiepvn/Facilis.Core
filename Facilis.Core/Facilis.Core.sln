@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31624.102
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Facilis.Core", "Facilis.Core\Facilis.Core.csproj", "{9B3E839F-875D-4E20-A26C-706F62401536}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facilis.Core", "Facilis.Core\Facilis.Core.csproj", "{9B3E839F-875D-4E20-A26C-706F62401536}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Facilis.Core.EntityFrameworkCore", "Facilis.Core.EntityFrameworkCore\Facilis.Core.EntityFrameworkCore.csproj", "{649467D4-C550-449D-B0DD-814A7895F80D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facilis.Core.EntityFrameworkCore", "Facilis.Core.EntityFrameworkCore\Facilis.Core.EntityFrameworkCore.csproj", "{649467D4-C550-449D-B0DD-814A7895F80D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Facilis.ToDoApp", "Facilis.ToDoApp\Facilis.ToDoApp.csproj", "{BCBB123A-B42F-4236-A9E4-E2588AE9A78A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{649467D4-C550-449D-B0DD-814A7895F80D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{649467D4-C550-449D-B0DD-814A7895F80D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{649467D4-C550-449D-B0DD-814A7895F80D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCBB123A-B42F-4236-A9E4-E2588AE9A78A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCBB123A-B42F-4236-A9E4-E2588AE9A78A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCBB123A-B42F-4236-A9E4-E2588AE9A78A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCBB123A-B42F-4236-A9E4-E2588AE9A78A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -20,7 +20,8 @@ namespace Facilis.Core.EntityFrameworkCore
 
         public IQueryable<T> WhereAll(Expression<Func<T, bool>> expression, bool expectDeleted = false)
         {
-            var entities = base.Where(expression);
+            var entities = expression == null ?
+                this.Rows : base.Where(expression);
 
             return expectDeleted ?
                 entities :
