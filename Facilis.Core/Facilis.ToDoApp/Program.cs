@@ -1,3 +1,5 @@
+using Facilis.Core.Abstractions;
+using Facilis.Core.EntityFrameworkCore;
 using Facilis.ToDoApp;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +10,8 @@ static void ConfigureService(WebApplicationBuilder builder)
         .AddDbContext<AppDbContext>(option =>
             option.UseSqlite("Data Source=./local.db;")
         )
-        .AddDbContext<DbContext, AppDbContext>();
+        .AddDbContext<DbContext, AppDbContext>()
+        .AddScoped(typeof(IEntities<>), typeof(Entities<>));
 }
 
 static void Configure(WebApplication app)
