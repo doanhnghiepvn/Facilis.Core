@@ -50,6 +50,10 @@
         axios.patch(`/api/to-do-items/${id}/${isMarkDone ? 'done' : 'undo'}`)
             .then(fetchItems);
     };
+    const deleteItem = (id) => {
+        axios.delete(`/api/to-do-items/${id}`)
+            .then(fetchItems);
+    };
 
     let that;
 </script>
@@ -82,13 +86,22 @@
             </div>
 
             <template x-for="item in todoItems" x-key="item.id">
-                <div class="d-flex align-items-center mb-2 clickable"
-                     x-on:click="updateItem(item.id, true)">
-                    <div class="me-3 fs-4">
-                        <i class="fa-regular fa-square"></i>
-                    </div>
+                <div class="mb-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center flex-grow-1 clickable"
+                             x-on:click="updateItem(item.id, true)">
+                            <div class="me-3 fs-4">
+                                <i class="fa-regular fa-square"></i>
+                            </div>
 
-                    <div x-text="item.name"></div>
+                            <div x-text="item.name"></div>
+                        </div>
+
+                        <div class="clickable"
+                             x-on:click="deleteItem(item.id)">
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
                 </div>
             </template>
 
@@ -96,13 +109,22 @@
 
             <div class="text-decoration-line-through text-black text-opacity-25">
                 <template x-for="item in doneItems" x-key="item.id">
-                    <div class="d-flex align-items-center mb-2 clickable"
-                         x-on:click="updateItem(item.id, false)">
-                        <div class="me-3 fs-4">
-                            <i class="fa-regular fa-square-check"></i>
-                        </div>
+                    <div class="mb-2">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center flex-grow-1 clickable"
+                                 x-on:click="updateItem(item.id, false)">
+                                <div class="me-3 fs-4">
+                                    <i class="fa-regular fa-square-check"></i>
+                                </div>
 
-                        <div x-text="item.name"></div>
+                                <div x-text="item.name"></div>
+                            </div>
+
+                            <div class="clickable text-black"
+                                 x-on:click="deleteItem(item.id)">
+                                <i class="fa-solid fa-xmark"></i>
+                            </div>
+                        </div>
                     </div>
                 </template>
             </div>
