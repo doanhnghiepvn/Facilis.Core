@@ -29,7 +29,8 @@ namespace Facilis.ToDoApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index([FromBody] string name)
+        [Route("{name}")]
+        public IActionResult Index(string name)
         {
             if (string.IsNullOrEmpty(name)) return BadRequest();
 
@@ -38,7 +39,7 @@ namespace Facilis.ToDoApp.Controllers
         }
 
         [HttpPatch]
-        [Route("done")]
+        [Route("{id}/done")]
         public IActionResult MarkDone(string id)
         {
             return this.UpdateStatus(id, StatusTypes.Disabled) ?
@@ -46,7 +47,7 @@ namespace Facilis.ToDoApp.Controllers
         }
 
         [HttpPatch]
-        [Route("undo")]
+        [Route("{id}/undo")]
         public IActionResult MarkNotDone(string id)
         {
             return this.UpdateStatus(id, StatusTypes.Enabled) ?
