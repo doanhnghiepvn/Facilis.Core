@@ -1,6 +1,7 @@
 ﻿using Facilis.Core.Abstractions;
 using Facilis.Core.Enums;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace Facilis.ToDoApp
 {
@@ -19,6 +20,7 @@ namespace Facilis.ToDoApp
 
     public class ToDoItem : IEntityWithId, IEntityWithStatus
     {
+        [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         public StatusTypes Status { get; set; }
