@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Facilis.Core.Abstractions
 {
-    public interface IEntities<T>
+    public interface IEntities<T> : IEntitiesWithId<T>
         where T : IEntityWithId, IEntityWithStatus
     {
         IQueryable<T> WhereEnabled(Expression<Func<T, bool>> expression = null);
