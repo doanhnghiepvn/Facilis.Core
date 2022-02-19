@@ -10,9 +10,52 @@
     .container {
         width: 400px;
     }
+
+    .clickable {
+        cursor: pointer;
+    }
 </style>
 
-<div class="vh-100 d-flex align-items-center justify-content-center">
+<script type="text/javascript">
+    const data = {
+        form: {
+            name: '',
+        },
+        todoItems: [],
+        doneItems: [],
+
+        init: function () {
+            that = this;
+            fetchItems();
+        },
+    };
+
+    const fetchItems = () => {
+        axios.get('/api/to-do-items')
+            .then(response => {
+                that.todoItems = response.data
+                    .filter(item => item.status == 0);
+                that.doneItems = response.data
+                    .filter(item => item.status != 0);
+            });
+    };
+    const postItem = function() {
+        axios.post(`/api/to-do-items/${data.form.name}`)
+            .then(() => {
+                that.form.name = '';
+                return fetchItems();
+            });
+    };
+    const updateItem = (id, isMarkDone) => {
+        axios.patch(`/api/to-do-items/${id}/${isMarkDone ? 'done' : 'undo'}`)
+            .then(fetchItems);
+    };
+
+    let that;
+</script>
+
+<div class="vh-100 d-flex align-items-center justify-content-center"
+     x-data="data">
     <div class="container p-0 bg-light rounded">
         <div class="d-flex text-center">
             <div class="w-50 py-3">
@@ -20,34 +63,48 @@
                     <i class="fa-regular fa-calendar-check"></i>
                 </span>
             </div>
-            
-                <div class="w-50 border-start border-bottom bg-black bg-opacity-10">
-                </div>
+
+            <div class="w-50 bg-black bg-opacity-10">
+            </div>
         </div>
 
-        <div class="p-4">
-            <div class="d-flex align-items-center mb-2">
-                <div class="me-3 fs-4">
-                    <i class="fa-regular fa-square"></i>
-                </div>
+        <div class="p-4"
+             x-on:click="console.log($data.todoItems)">
+            <div class="d-flex mb-3">
+                <input class="form-control me-2"
+                       placeholder="New item..."
+                       x-model="form.name" />
 
-                <div>
-                    Call the dentist
-                </div>
+                <button class="btn btn-primary"
+                        x-on:click="postItem()">
+                    Add
+                </button>
             </div>
+
+            <template x-for="item in todoItems" x-key="item.id">
+                <div class="d-flex align-items-center mb-2 clickable"
+                     x-on:click="updateItem(item.id, true)">
+                    <div class="me-3 fs-4">
+                        <i class="fa-regular fa-square"></i>
+                    </div>
+
+                    <div x-text="item.name"></div>
+                </div>
+            </template>
 
             <hr />
 
             <div class="text-decoration-line-through text-black text-opacity-25">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="me-3 fs-4">
-                        <i class="fa-regular fa-square-check"></i>
-                    </div>
+                <template x-for="item in doneItems" x-key="item.id">
+                    <div class="d-flex align-items-center mb-2 clickable"
+                         x-on:click="updateItem(item.id, false)">
+                        <div class="me-3 fs-4">
+                            <i class="fa-regular fa-square-check"></i>
+                        </div>
 
-                    <div>
-                        Zero inbox
+                        <div x-text="item.name"></div>
                     </div>
-                </div>
+                </template>
             </div>
         </div>
     </div>
