@@ -12,6 +12,7 @@ namespace Facilis.ExtendedEntities.Abstractions
         IEntityWithScope,
         IEntityWithKeyValuePair
     {
+        T CastValue<T>();
     }
 
     public class ExtendedAttribute : IExtendedAttribute
@@ -30,5 +31,10 @@ namespace Facilis.ExtendedEntities.Abstractions
 
         public string Key { get; set; }
         public string Value { get; set; }
+
+        public T CastValue<T>()
+        {
+            return (T)Convert.ChangeType(this.Value, typeof(T));
+        }
     }
 }
