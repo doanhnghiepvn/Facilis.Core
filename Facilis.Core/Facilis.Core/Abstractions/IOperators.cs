@@ -7,7 +7,7 @@
         string GetCurrentOperatorName();
     }
 
-    public class Operator : IOperators
+    public class Operators : IOperators
     {
         public string SystemOperatorName { get; set; }
         public string CurrentOperatorName { get; set; }
