@@ -2,8 +2,8 @@
 {
     public interface IEntityWithKeyValuePair<T>
     {
-        string Key { get; }
-        T Value { get; }
+        string Key { get; set; }
+        T Value { get; set; }
     }
 
     public interface IEntityWithKeyValuePair : IEntityWithKeyValuePair<string>

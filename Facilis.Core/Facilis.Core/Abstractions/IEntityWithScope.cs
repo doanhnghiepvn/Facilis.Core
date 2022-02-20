@@ -2,7 +2,7 @@
 {
     public interface IEntityWithScope
     {
-        string Scope { get; }
-        string ScopedId { get; }
+        string Scope { get; set; }
+        string ScopedId { get; set; }
     }
 }

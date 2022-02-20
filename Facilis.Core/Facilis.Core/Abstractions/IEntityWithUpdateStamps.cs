@@ -4,7 +4,7 @@ namespace Facilis.Core.Abstractions
 {
     public interface IEntityWithUpdateStamps
     {
-        string UpdatedBy { get; }
-        DateTime UpdatedAtUtc { get; }
+        string UpdatedBy { get; set; }
+        DateTime UpdatedAtUtc { get; set; }
     }
 }
