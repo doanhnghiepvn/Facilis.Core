@@ -6,6 +6,7 @@ namespace Facilis.ExtendedEntities.Abstractions
 {
     public interface IExtendedAttributes
     {
+        IOperators Operators { get; }
         string Scope { get; }
 
         IQueryable<IExtendedAttribute> WhereEnabledDescendingSort(string scopedId, string key);
@@ -21,9 +22,12 @@ namespace Facilis.ExtendedEntities.Abstractions
         void Save();
     }
 
-    public interface IExtendedAttributes<T> where T : IExtendedAttribute
+    public interface IExtendedAttributes<T> : IExtendedAttributes
+        where T : IExtendedAttribute
     {
         IEntities<T> Entities { get; }
+
+        IExtendedAttributes<T> ChangeScope(string scope);
 
         T CreateEntity(string scopedId, string key, string value);
     }
@@ -33,8 +37,8 @@ namespace Facilis.ExtendedEntities.Abstractions
         where T : class, IExtendedAttribute, new()
     {
         private IEntities<T> entities { get; }
-        private IOperators operators { get; }
 
+        public IOperators Operators { get; }
         public string Scope { get; set; }
         public IEntities<T> Entities => this.entities;
 
@@ -43,17 +47,25 @@ namespace Facilis.ExtendedEntities.Abstractions
         public ExtendedAttributes(IEntities<T> entities, IOperators operators)
         {
             this.entities = entities;
-            this.operators = operators;
+            this.Operators = operators;
         }
 
         #endregion Constructor(s)
+
+        public virtual IExtendedAttributes<T> ChangeScope(string scope)
+        {
+            return new ExtendedAttributes<T>(this.entities, this.Operators)
+            {
+                Scope = scope
+            };
+        }
 
         public virtual T CreateEntity(string scopedId, string key, string value)
         {
             return new T()
             {
-                CreatedBy = this.operators.GetCurrentOperatorName(),
-                UpdatedBy = this.operators.GetCurrentOperatorName(),
+                CreatedBy = this.Operators.GetCurrentOperatorName(),
+                UpdatedBy = this.Operators.GetCurrentOperatorName(),
                 Scope = this.Scope,
                 ScopedId = scopedId,
                 Key = key,
@@ -91,7 +103,7 @@ namespace Facilis.ExtendedEntities.Abstractions
         {
             var entity = this.entities.FindById(id);
 
-            entity.UpdatedBy = this.operators.GetCurrentOperatorName();
+            entity.UpdatedBy = this.Operators.GetCurrentOperatorName();
             entity.UpdatedAtUtc = DateTime.UtcNow;
             entity.Value = value;
 
