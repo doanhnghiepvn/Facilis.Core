@@ -8,20 +8,24 @@ namespace Facilis.ExtendedEntities.Abstractions
     {
         string Scope { get; }
 
-        IExtendedAttribute Add(string scopedId, string key, string value);
-
-        IExtendedAttribute AddOrUpdate(string scopedId, string key, string value);
+        IQueryable<IExtendedAttribute> WhereEnabledDescendingSort(string scopedId, string key);
 
         bool AnyEnabled(string scopedId, string key);
 
-        IExtendedAttribute Update(string id, string value);
+        IExtendedAttribute AddNoSave(string scopedId, string key, string value);
 
-        IQueryable<IExtendedAttribute> WhereEnabledDescendingSort(string scopedId, string key);
+        IExtendedAttribute AddOrUpdateNoSave(string scopedId, string key, string value);
+
+        IExtendedAttribute UpdateNoSave(string id, string value);
+
+        void Save();
     }
 
     public interface IExtendedAttributes<T> where T : IExtendedAttribute
     {
         IEntities<T> Entities { get; }
+
+        T CreateEntity(string scopedId, string key, string value);
     }
 
     public class ExtendedAttributes<T> :
@@ -44,6 +48,19 @@ namespace Facilis.ExtendedEntities.Abstractions
 
         #endregion Constructor(s)
 
+        public virtual T CreateEntity(string scopedId, string key, string value)
+        {
+            return new T()
+            {
+                CreatedBy = this.operators.GetCurrentOperatorName(),
+                UpdatedBy = this.operators.GetCurrentOperatorName(),
+                Scope = this.Scope,
+                ScopedId = scopedId,
+                Key = key,
+                Value = value
+            };
+        }
+
         public virtual IQueryable<IExtendedAttribute> WhereEnabledDescendingSort(
             string scopedId,
             string key
@@ -62,20 +79,15 @@ namespace Facilis.ExtendedEntities.Abstractions
             return this.WhereEnabledDescendingSort(scopedId, key).Any();
         }
 
-        public virtual IExtendedAttribute Add(string scopedId, string key, string value)
+        public virtual IExtendedAttribute AddNoSave(string scopedId, string key, string value)
         {
-            return this.entities.Add(new T()
-            {
-                CreatedBy = this.operators.GetCurrentOperatorName(),
-                UpdatedBy = this.operators.GetCurrentOperatorName(),
-                Scope = this.Scope,
-                ScopedId = scopedId,
-                Key = key,
-                Value = value
-            });
+            var entity = this.CreateEntity(scopedId, key, value);
+            this.entities.AddNoSave(entity);
+
+            return entity;
         }
 
-        public virtual IExtendedAttribute Update(string id, string value)
+        public virtual IExtendedAttribute UpdateNoSave(string id, string value)
         {
             var entity = this.entities.FindById(id);
 
@@ -83,18 +95,21 @@ namespace Facilis.ExtendedEntities.Abstractions
             entity.UpdatedAtUtc = DateTime.UtcNow;
             entity.Value = value;
 
-            return this.entities.Update(entity);
+            this.entities.UpdateNoSave(entity);
+            return entity;
         }
 
-        public virtual IExtendedAttribute AddOrUpdate(string scopedId, string key, string value)
+        public virtual IExtendedAttribute AddOrUpdateNoSave(string scopedId, string key, string value)
         {
             var entity = this.WhereEnabledDescendingSort(scopedId, key)
                 .FirstOrDefault();
 
             return entity == null ?
-                this.Add(scopedId, key, value) :
-                this.Update(entity.Id, value);
+                this.AddNoSave(scopedId, key, value) :
+                this.UpdateNoSave(entity.Id, value);
         }
+
+        public virtual void Save() => this.entities.Save();
     }
 
     public class ExtendedAttributes : ExtendedAttributes<ExtendedAttribute>
