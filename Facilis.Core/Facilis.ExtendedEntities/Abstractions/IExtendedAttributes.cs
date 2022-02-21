@@ -6,7 +6,6 @@ namespace Facilis.ExtendedEntities.Abstractions
 {
     public interface IExtendedAttributes
     {
-        IOperators Operators { get; }
         string Scope { get; }
 
         IQueryable<IExtendedAttribute> WhereEnabledDescendingSort(string scopedId, string key);
@@ -37,8 +36,8 @@ namespace Facilis.ExtendedEntities.Abstractions
         where T : class, IExtendedAttribute, new()
     {
         private IEntities<T> entities { get; }
+        private IOperators operators { get; }
 
-        public IOperators Operators { get; }
         public string Scope { get; set; }
         public IEntities<T> Entities => this.entities;
 
@@ -47,14 +46,14 @@ namespace Facilis.ExtendedEntities.Abstractions
         public ExtendedAttributes(IEntities<T> entities, IOperators operators)
         {
             this.entities = entities;
-            this.Operators = operators;
+            this.operators = operators;
         }
 
         #endregion Constructor(s)
 
         public virtual IExtendedAttributes<T> ChangeScope(string scope)
         {
-            return new ExtendedAttributes<T>(this.entities, this.Operators)
+            return new ExtendedAttributes<T>(this.entities, this.operators)
             {
                 Scope = scope
             };
@@ -64,8 +63,8 @@ namespace Facilis.ExtendedEntities.Abstractions
         {
             return new T()
             {
-                CreatedBy = this.Operators.GetCurrentOperatorName(),
-                UpdatedBy = this.Operators.GetCurrentOperatorName(),
+                CreatedBy = this.operators.GetCurrentOperatorName(),
+                UpdatedBy = this.operators.GetCurrentOperatorName(),
                 Scope = this.Scope,
                 ScopedId = scopedId,
                 Key = key,
@@ -103,7 +102,7 @@ namespace Facilis.ExtendedEntities.Abstractions
         {
             var entity = this.entities.FindById(id);
 
-            entity.UpdatedBy = this.Operators.GetCurrentOperatorName();
+            entity.UpdatedBy = this.operators.GetCurrentOperatorName();
             entity.UpdatedAtUtc = DateTime.UtcNow;
             entity.Value = value;
 
