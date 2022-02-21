@@ -2,10 +2,11 @@
 {
     public interface IEntityWithProfile
     {
+        object Profile { get; }
         string SerializedProfile { get; }
 
         void SetProfile(object profile);
 
-        T GetProfile<T>() where T : class, new();
+        T GetProfile<T>();
     }
 }
