@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facilis.Core", "Facilis.Cor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facilis.Core.EntityFrameworkCore", "Facilis.Core.EntityFrameworkCore\Facilis.Core.EntityFrameworkCore.csproj", "{649467D4-C550-449D-B0DD-814A7895F80D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Facilis.ToDoApp", "Facilis.ToDoApp\Facilis.ToDoApp.csproj", "{BCBB123A-B42F-4236-A9E4-E2588AE9A78A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Facilis.ToDoApp", "Facilis.ToDoApp\Facilis.ToDoApp.csproj", "{BCBB123A-B42F-4236-A9E4-E2588AE9A78A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Facilis.ExtendedEntities", "Facilis.ExtendedEntities\Facilis.ExtendedEntities.csproj", "{3844CA07-F523-4D28-9FBB-521DAF51848F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{BCBB123A-B42F-4236-A9E4-E2588AE9A78A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCBB123A-B42F-4236-A9E4-E2588AE9A78A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCBB123A-B42F-4236-A9E4-E2588AE9A78A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3844CA07-F523-4D28-9FBB-521DAF51848F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3844CA07-F523-4D28-9FBB-521DAF51848F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3844CA07-F523-4D28-9FBB-521DAF51848F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3844CA07-F523-4D28-9FBB-521DAF51848F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
