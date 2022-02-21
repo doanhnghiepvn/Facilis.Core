@@ -1,5 +1,7 @@
 ﻿using Facilis.Core.Abstractions;
 using Facilis.Core.EntityFrameworkCore;
+using Facilis.ExtendedEntities.Abstractions;
+using Facilis.ExtendedEntities.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -18,6 +20,8 @@ namespace Facilis.Core.Tests
                     .UseInMemoryDatabase(databaseName: nameof(Facilis))
                     .Options
             );
+
+            AutoBindProfile(this.Context);
         }
 
         #endregion Constructor(s)
@@ -32,6 +36,26 @@ namespace Facilis.Core.Tests
         {
             this.Context?.Database.EnsureDeleted();
             this.Context?.Dispose();
+        }
+
+        private static void AutoBindProfile(DbContext context)
+        {
+            var operators = new Operators()
+            {
+                CurrentOperatorName = nameof(Facilis),
+                SystemOperatorName = nameof(System),
+            };
+            var extendedAttributes = new ExtendedAttributes(
+                new Entities<ExtendedAttribute>(context),
+                operators
+            );
+            var profileBinder = new ProfileAttributesBinder(
+                extendedAttributes,
+                operators
+            );
+
+            context.SavingChanges += profileBinder.DbContextSavingChanges;
+            context.SavedChanges += profileBinder.DbContextSavedChanges;
         }
     }
 }
