@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Facilis.Core.EntityFrameworkCore\Facilis.Core.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\Facilis.ExtendedEntities.EntityFrameworkCore\Facilis.ExtendedEntities.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>

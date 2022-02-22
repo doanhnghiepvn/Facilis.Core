@@ -1,7 +1,6 @@
 ﻿using Facilis.Core.Abstractions;
 using Facilis.Core.EntityFrameworkCore;
-using Facilis.ExtendedEntities.Abstractions;
-using Facilis.ExtendedEntities.EntityFrameworkCore;
+using Facilis.Core.EntityFrameworkCore.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using System;
 

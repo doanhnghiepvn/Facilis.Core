@@ -1,5 +1,5 @@
-﻿using Facilis.Core.Tests.Models;
-using Facilis.ExtendedEntities.Abstractions;
+﻿using Facilis.Core.Abstractions;
+using Facilis.Core.Tests.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Facilis.Core.Tests
