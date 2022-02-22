@@ -1,8 +1,7 @@
-﻿using Facilis.Core.Abstractions;
-using System;
+﻿using System;
 using System.Linq;
 
-namespace Facilis.ExtendedEntities.Abstractions
+namespace Facilis.Core.Abstractions
 {
     public interface IExtendedAttributes
     {

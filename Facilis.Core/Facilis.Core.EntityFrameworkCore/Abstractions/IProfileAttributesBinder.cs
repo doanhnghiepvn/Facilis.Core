@@ -1,5 +1,4 @@
 ﻿using Facilis.Core.Abstractions;
-using Facilis.ExtendedEntities.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 
-namespace Facilis.ExtendedEntities.EntityFrameworkCore
+namespace Facilis.Core.EntityFrameworkCore.Abstractions
 {
     public interface IProfileAttributesBinder
     {
