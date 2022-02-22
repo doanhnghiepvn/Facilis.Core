@@ -59,14 +59,14 @@ namespace Facilis.Core.EntityFrameworkCore.Models
 
                     var shouldUpdate = value != attribute.Value ||
                         this.EntityStatus != attribute.Status;
+                    if (!shouldUpdate) return null;
 
-                    return shouldUpdate ? new T()
-                    {
-                        Status = this.EntityStatus,
-                        UpdatedBy = this.Operators.GetSystemOperatorName(),
-                        UpdatedAtUtc = DateTime.UtcNow,
-                        Value = value
-                    } : null;
+                    attribute.Status = this.EntityStatus;
+                    attribute.UpdatedBy = this.Operators.GetSystemOperatorName();
+                    attribute.UpdatedAtUtc = DateTime.UtcNow;
+                    attribute.Value = value;
+
+                    return attribute;
                 })
                 .Where(attribute => attribute != null)
                 .ToArray();
