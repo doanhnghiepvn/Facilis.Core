@@ -60,13 +60,12 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
         {
             if (this.HasPendingChanges())
             {
-                if (this.newEntities.Any()) this.attributes.Entities.Add(this.newEntities);
-                if (this.updateEntities.Any()) this.attributes.Entities.Update(this.updateEntities);
+                if (this.newEntities.Any()) this.attributes.Entities.AddNoSave(this.newEntities);
+                if (this.updateEntities.Any()) this.attributes.Entities.UpdateNoSave(this.updateEntities);
 
+                this.Clear();
                 this.attributes.Save();
             }
-
-            this.Clear();
         }
 
         protected virtual void TrackAdded(ChangeTracker tracker)
