@@ -1,5 +1,6 @@
 ﻿using Facilis.Core.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,8 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
     public class ProfileAttributesBinder<T> : IProfileAttributesBinder
         where T : class, IExtendedAttribute, new()
     {
+        protected delegate void TrackedEventHandler(object sender, ProfileAttributesBindingEventArgs<T> e);
+
         private IList<T> newEntities { get; } = new List<T>();
         private IList<T> updateEntities { get; } = new List<T>();
 
@@ -46,54 +49,10 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
 
         public void DbContextSavingChanges(object sender, SavingChangesEventArgs e)
         {
-            this.Clear();
-
             if (sender is DbContext context)
             {
-                foreach (var tracked in context.ChangeTracker
-                    .Entries()
-                    .Where(tracked =>
-                        new[] { EntityState.Modified, EntityState.Added, }
-                            .Contains(tracked.State)
-                    )
-                )
-                {
-                    if (tracked.Entity is IEntityWithProfile entity)
-                    {
-                        var profile = entity.Profile;
-                        if (profile == null) continue;
-
-                        var scope = $"{entity.GetType().Namespace}.{entity.GetType().Name}";
-                        var scopedId = ((IEntityWithId)entity).Id;
-
-                        var attributes = this.attributes.ChangeScope(scope);
-
-                        foreach (var property in profile.GetType().GetProperties())
-                        {
-                            var key = property.Name;
-                            var rawValue = ToRawValue(profile, property);
-
-                            if (attributes.AnyEnabled(scopedId, key))
-                            {
-                                var attribute = attributes
-                                    .WhereEnabledDescendingSort(scopedId, key)
-                                    .Cast<T>()
-                                    .First();
-
-                                attribute.UpdatedBy = this.operators.GetCurrentOperatorName();
-                                attribute.UpdatedAtUtc = DateTime.UtcNow;
-                                attribute.Value = rawValue;
-
-                                this.updateEntities.Add(attribute);
-                            }
-                            else
-                            {
-                                this.newEntities
-                                    .Add(attributes.CreateEntity(scopedId, key, rawValue));
-                            }
-                        }
-                    }
-                }
+                this.TrackAdded(context.ChangeTracker);
+                this.TrackModified(context.ChangeTracker);
             }
         }
 
@@ -108,6 +67,92 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
             }
 
             this.Clear();
+        }
+
+        protected virtual void TrackAdded(ChangeTracker tracker)
+        {
+            this.Track(
+                tracker.Entries(),
+                (sender, args) =>
+                {
+                    var scopedId = args.ScopedId;
+
+                    foreach (var (key, value) in args.ValuesGroupedInKeys)
+                    {
+                        this.newEntities.Add(args
+                            .Attributes
+                            .CreateEntity(scopedId, key, value));
+                    }
+                },
+                EntityState.Added
+            );
+        }
+
+        protected virtual void TrackModified(ChangeTracker tracker)
+        {
+            this.Track(
+                tracker.Entries(),
+                (sender, args) =>
+                {
+                    var scopedId = args.ScopedId;
+
+                    foreach (var (key, value) in args.ValuesGroupedInKeys)
+                    {
+                        if (args.Attributes.AnyEnabled(args.ScopedId, key))
+                        {
+                            var attribute = args
+                                .Attributes
+                                .WhereEnabledDescendingSort(args.ScopedId, key)
+                                .Cast<T>()
+                                .First();
+
+                            attribute.UpdatedBy = this.operators.GetCurrentOperatorName();
+                            attribute.UpdatedAtUtc = DateTime.UtcNow;
+                            attribute.Value = args.ValuesGroupedInKeys[key];
+
+                            this.updateEntities.Add(attribute);
+                        }
+                    }
+                },
+                EntityState.Modified
+            );
+        }
+
+        protected virtual void Track(
+            IEnumerable<EntityEntry> entries,
+            TrackedEventHandler eventHandler,
+            params EntityState[] states
+        )
+        {
+            foreach (var tracked in entries
+                .Where(entry => states.Contains(entry.State))
+            )
+            {
+                if (tracked.Entity is IEntityWithProfile entity)
+                {
+                    var profile = entity.Profile;
+                    if (profile == null) continue;
+
+                    var scope = $"{entity.GetType().Namespace}.{entity.GetType().Name}";
+                    var scopedId = ((IEntityWithId)entity).Id;
+
+                    var arguments = new ProfileAttributesBindingEventArgs<T>()
+                    {
+                        Attributes = this.attributes.ChangeScope(scope),
+                        ScopedId = scopedId,
+                    };
+
+                    foreach (var property in profile.GetType().GetProperties())
+                    {
+                        var key = property.Name;
+                        var rawValue = ToRawValue(profile, property);
+
+                        arguments.ValuesGroupedInKeys.Add(key, rawValue);
+                    }
+
+                    eventHandler(this, arguments);
+                }
+            }
         }
 
         private void Clear()
