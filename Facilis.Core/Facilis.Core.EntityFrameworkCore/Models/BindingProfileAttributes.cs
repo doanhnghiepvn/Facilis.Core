@@ -16,13 +16,15 @@ namespace Facilis.Core.EntityFrameworkCore.Models
         public T[] Attributes { get; set; }
 
         public IOperators Operators { get; set; }
+
+        public List<string> ImmutableKeys { get; } = new();
         public Dictionary<string, string> ValuesGroupedInKeys { get; } = new();
 
         public T[] GetNewAttributes()
         {
             return this.ValuesGroupedInKeys.Keys
-                .Where(key => !this.Attributes
-                    .Any(attribute => attribute.Key == key)
+                .Where(key => this.ImmutableKeys.Contains(key) ||
+                    !this.Attributes.Any(attribute => attribute.Key == key)
                 )
                 .Select(key =>
                 {
@@ -57,14 +59,18 @@ namespace Facilis.Core.EntityFrameworkCore.Models
                     );
                     var value = this.ValuesGroupedInKeys[key];
 
-                    var shouldUpdate = value != attribute.Value ||
-                        this.EntityStatus != attribute.Status;
-                    if (!shouldUpdate) return null;
+                    var immutable = this.ImmutableKeys.Contains(key);
+                    var valueChanged = value != attribute.Value;
+                    var statusChanged = this.EntityStatus != attribute.Status;
+
+                    if (!valueChanged && !statusChanged) return null;
+                    if (immutable && !statusChanged) return null;
 
                     attribute.Status = this.EntityStatus;
                     attribute.UpdatedBy = this.Operators.GetSystemOperatorName();
                     attribute.UpdatedAtUtc = DateTime.UtcNow;
-                    attribute.Value = value;
+
+                    if (!immutable) attribute.Value = value;
 
                     return attribute;
                 })

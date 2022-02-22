@@ -1,4 +1,5 @@
 ﻿using Facilis.Core.Abstractions;
+using Facilis.Core.Attributes;
 using Facilis.Core.EntityFrameworkCore.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -120,6 +121,10 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
                         var key = property.Name;
                         var rawValue = ToRawValue(profile, property);
 
+                        if (property.GetCustomAttribute(typeof(ImmutableAttribute)) != null)
+                        {
+                            profileAttributes.ImmutableKeys.Add(key);
+                        }
                         profileAttributes.ValuesGroupedInKeys.Add(key, rawValue);
                     }
 
