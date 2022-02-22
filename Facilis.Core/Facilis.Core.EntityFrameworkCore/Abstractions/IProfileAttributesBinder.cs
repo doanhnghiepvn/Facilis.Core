@@ -40,12 +40,12 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
 
         #endregion Constructor(s)
 
-        public bool HasPendingChanges()
+        public virtual bool HasPendingChanges()
         {
             return this.bindingModels.Count > 0;
         }
 
-        public void DbContextSavingChanges(object sender, SavingChangesEventArgs e)
+        public virtual void DbContextSavingChanges(object sender, SavingChangesEventArgs e)
         {
             var trackStates = new[]
             {
@@ -61,42 +61,28 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
             }
         }
 
-        public void DbContextSavedChanges(object sender, SavedChangesEventArgs e)
+        public virtual void DbContextSavedChanges(object sender, SavedChangesEventArgs e)
         {
             if (this.HasPendingChanges())
             {
                 var newAttributes = new List<T>();
-                var updateAttributes = new List<T>();
+                var updatingAttributes = new List<T>();
 
                 foreach (var model in this.bindingModels)
                 {
-                    foreach (var (key, value) in model.ValuesGroupedInKeys)
-                    {
-                        var attribute = Array.Find(
-                            model.Attributes,
-                            attribute => attribute.Key == key
-                        );
-                        var exists = attribute != null;
-
-                        attribute ??= new T()
-                        {
-                            CreatedBy = this.operators.GetSystemOperatorName(),
-                            Scope = model.Scope,
-                            ScopedId = model.EntityId,
-                            Key = key,
-                        };
-
-                        attribute.Status = model.EntityStatus;
-                        attribute.UpdatedBy = this.operators.GetSystemOperatorName();
-                        attribute.UpdatedAtUtc = DateTime.UtcNow;
-                        attribute.Value = value;
-
-                        (exists ? updateAttributes : newAttributes).Add(attribute);
-                    }
+                    newAttributes.AddRange(model.GetNewAttributes());
+                    updatingAttributes.AddRange(model.GetUpdatingAttributes());
                 }
 
-                if (newAttributes.Any()) this.attributes.AddNoSave(newAttributes);
-                if (updateAttributes.Any()) this.attributes.UpdateNoSave(updateAttributes);
+                if (newAttributes.Any())
+                {
+                    this.attributes.AddNoSave(newAttributes);
+                }
+
+                if (updatingAttributes.Any())
+                {
+                    this.attributes.UpdateNoSave(updatingAttributes);
+                }
 
                 this.Clear();
                 this.attributes.Save();
@@ -125,6 +111,8 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
                             .ChangeScope(scope)
                             .QueryEnabledByScopedId(scopedId)
                             .ToArray(),
+
+                        Operators = this.operators,
                     };
 
                     foreach (var property in profile.GetType().GetProperties())
