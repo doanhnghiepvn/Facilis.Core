@@ -4,6 +4,6 @@ namespace Facilis.Core.Abstractions
 {
     public interface IEntityWithStatus
     {
-        StatusTypes Status { get; }
+        StatusTypes Status { get; set; }
     }
 }

@@ -1,8 +1,7 @@
-﻿using Facilis.Core.Abstractions;
-using Facilis.Core.Enums;
+﻿using Facilis.Core.Enums;
 using System;
 
-namespace Facilis.ExtendedEntities.Abstractions
+namespace Facilis.Core.Abstractions
 {
     public interface IExtendedAttribute :
         IEntityWithId,
