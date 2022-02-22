@@ -104,5 +104,33 @@ namespace Facilis.Core.Tests
             Assert.IsTrue(attributes.All(entity => entity.Status == user.Status));
             Assert.Pass();
         }
+
+        [Test]
+        public void Test_UpdateImmutable_AttributeIsOnTopAdded()
+        {
+            // Arrange
+            var users = this.instances.GetEntities<User>();
+            var user = new User();
+            var profile = new UserProfile() { Copy = new() };
+
+            user.SetProfile(profile);
+            users.Add(user);
+
+            // Act
+            profile.LastSignInAtUtc = DateTime.UtcNow.AddHours(1);
+            user.SetProfile(profile);
+            users.Update(user);
+
+            var attributes = this.instances
+                .GetEntities<ExtendedAttribute>()
+                .WhereEnabled(entity => entity.ScopedId == user.Id &&
+                    entity.Key == nameof(UserProfile.LastSignInAtUtc)
+                )
+                .ToArray();
+
+            // Assert
+            Assert.AreNotEqual(attributes[0].Value, attributes[1].Value);
+            Assert.Pass();
+        }
     }
 }

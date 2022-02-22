@@ -1,4 +1,5 @@
 ﻿using Facilis.Core.Abstractions;
+using Facilis.Core.Attributes;
 using Facilis.Core.Enums;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -47,6 +48,8 @@ namespace Facilis.Core.Tests.Models
         public int Age { get; set; } = 48;
         public string[] AddressLines { get; set; } = { "890 Fifth Avenue", "Manhattan", "New York City" };
         public decimal HeightInCm { get; set; } = 185.42m;
+
+        [Immutable]
         public DateTime LastSignInAtUtc { get; set; } = DateTime.UtcNow;
         public FileInfo Avatar { get; set; }
         public UserProfile Copy { get; set; }
