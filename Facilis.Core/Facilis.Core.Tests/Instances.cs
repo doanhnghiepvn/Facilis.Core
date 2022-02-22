@@ -44,12 +44,9 @@ namespace Facilis.Core.Tests
                 CurrentOperatorName = nameof(Facilis),
                 SystemOperatorName = nameof(System),
             };
-            var extendedAttributes = new ExtendedAttributes(
-                new Entities<ExtendedAttribute>(context),
-                operators
-            );
+            var attributes = new ScopedEntities<ExtendedAttribute>(context);
             var profileBinder = new ProfileAttributesBinder(
-                extendedAttributes,
+                attributes,
                 operators
             );
 

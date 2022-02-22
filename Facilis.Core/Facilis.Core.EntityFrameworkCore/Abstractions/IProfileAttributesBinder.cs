@@ -1,4 +1,5 @@
 ﻿using Facilis.Core.Abstractions;
+using Facilis.Core.EntityFrameworkCore.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
@@ -21,22 +22,19 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
     public class ProfileAttributesBinder<T> : IProfileAttributesBinder
         where T : class, IExtendedAttribute, new()
     {
-        protected delegate void TrackedEventHandler(object sender, ProfileAttributesBindingEventArgs<T> e);
+        private List<BindingProfileAttributes<T>> bindingModels { get; } = new();
 
-        private IList<T> newEntities { get; } = new List<T>();
-        private IList<T> updateEntities { get; } = new List<T>();
-
-        private IExtendedAttributes<T> attributes { get; }
+        private IScopedEntities<T> attributes { get; }
         private IOperators operators { get; }
 
         #region Constructor(s)
 
         public ProfileAttributesBinder(
-            IExtendedAttributes<T> extendedAttributes,
+            IScopedEntities<T> attributes,
             IOperators operators
         )
         {
-            this.attributes = extendedAttributes;
+            this.attributes = attributes;
             this.operators = operators;
         }
 
@@ -44,15 +42,22 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
 
         public bool HasPendingChanges()
         {
-            return (this.newEntities.Count + this.updateEntities.Count) > 0;
+            return this.bindingModels.Count > 0;
         }
 
         public void DbContextSavingChanges(object sender, SavingChangesEventArgs e)
         {
+            var trackStates = new[]
+            {
+                EntityState.Added,
+                EntityState.Modified,
+            };
             if (sender is DbContext context)
             {
-                this.TrackAdded(context.ChangeTracker);
-                this.TrackModified(context.ChangeTracker);
+                this.Track(context.ChangeTracker
+                    .Entries()
+                    .Where(entry => trackStates.Contains(entry.State))
+                );
             }
         }
 
@@ -60,72 +65,47 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
         {
             if (this.HasPendingChanges())
             {
-                if (this.newEntities.Any()) this.attributes.Entities.AddNoSave(this.newEntities);
-                if (this.updateEntities.Any()) this.attributes.Entities.UpdateNoSave(this.updateEntities);
+                var newAttributes = new List<T>();
+                var updateAttributes = new List<T>();
+
+                foreach (var model in this.bindingModels)
+                {
+                    foreach (var (key, value) in model.ValuesGroupedInKeys)
+                    {
+                        var attribute = Array.Find(
+                            model.Attributes,
+                            attribute => attribute.Key == key
+                        );
+                        var exists = attribute != null;
+
+                        attribute ??= new T()
+                        {
+                            CreatedBy = this.operators.GetSystemOperatorName(),
+                            Scope = model.Scope,
+                            ScopedId = model.EntityId,
+                            Key = key,
+                        };
+
+                        attribute.Status = model.EntityStatus;
+                        attribute.UpdatedBy = this.operators.GetSystemOperatorName();
+                        attribute.UpdatedAtUtc = DateTime.UtcNow;
+                        attribute.Value = value;
+
+                        (exists ? updateAttributes : newAttributes).Add(attribute);
+                    }
+                }
+
+                if (newAttributes.Any()) this.attributes.AddNoSave(newAttributes);
+                if (updateAttributes.Any()) this.attributes.UpdateNoSave(updateAttributes);
 
                 this.Clear();
                 this.attributes.Save();
             }
         }
 
-        protected virtual void TrackAdded(ChangeTracker tracker)
+        protected virtual void Track(IEnumerable<EntityEntry> entries)
         {
-            this.Track(
-                tracker.Entries(),
-                (sender, args) =>
-                {
-                    var scopedId = args.ScopedId;
-
-                    foreach (var (key, value) in args.ValuesGroupedInKeys)
-                    {
-                        this.newEntities.Add(args
-                            .Attributes
-                            .CreateEntity(scopedId, key, value));
-                    }
-                },
-                EntityState.Added
-            );
-        }
-
-        protected virtual void TrackModified(ChangeTracker tracker)
-        {
-            this.Track(
-                tracker.Entries(),
-                (sender, args) =>
-                {
-                    var scopedId = args.ScopedId;
-
-                    foreach (var (key, value) in args.ValuesGroupedInKeys)
-                    {
-                        if (args.Attributes.AnyEnabled(args.ScopedId, key))
-                        {
-                            var attribute = args
-                                .Attributes
-                                .WhereEnabledDescendingSort(args.ScopedId, key)
-                                .Cast<T>()
-                                .First();
-
-                            attribute.UpdatedBy = this.operators.GetCurrentOperatorName();
-                            attribute.UpdatedAtUtc = DateTime.UtcNow;
-                            attribute.Value = args.ValuesGroupedInKeys[key];
-
-                            this.updateEntities.Add(attribute);
-                        }
-                    }
-                },
-                EntityState.Modified
-            );
-        }
-
-        protected virtual void Track(
-            IEnumerable<EntityEntry> entries,
-            TrackedEventHandler eventHandler,
-            params EntityState[] states
-        )
-        {
-            foreach (var tracked in entries
-                .Where(entry => states.Contains(entry.State))
-            )
+            foreach (var tracked in entries)
             {
                 if (tracked.Entity is IEntityWithProfile entity)
                 {
@@ -135,10 +115,16 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
                     var scope = $"{entity.GetType().Namespace}.{entity.GetType().Name}";
                     var scopedId = ((IEntityWithId)entity).Id;
 
-                    var arguments = new ProfileAttributesBindingEventArgs<T>()
+                    var profileAttributes = new BindingProfileAttributes<T>()
                     {
-                        Attributes = this.attributes.ChangeScope(scope),
-                        ScopedId = scopedId,
+                        EntityId = scopedId,
+                        EntityStatus = ((IEntityWithStatus)entity).Status,
+
+                        Scope = scope,
+                        Attributes = this.attributes
+                            .ChangeScope(scope)
+                            .QueryEnabledByScopedId(scopedId)
+                            .ToArray(),
                     };
 
                     foreach (var property in profile.GetType().GetProperties())
@@ -146,18 +132,17 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
                         var key = property.Name;
                         var rawValue = ToRawValue(profile, property);
 
-                        arguments.ValuesGroupedInKeys.Add(key, rawValue);
+                        profileAttributes.ValuesGroupedInKeys.Add(key, rawValue);
                     }
 
-                    eventHandler(this, arguments);
+                    this.bindingModels.Add(profileAttributes);
                 }
             }
         }
 
         private void Clear()
         {
-            this.newEntities.Clear();
-            this.updateEntities.Clear();
+            this.bindingModels.Clear();
         }
 
         private static string ToRawValue(object profile, PropertyInfo property)
@@ -177,9 +162,9 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
         #region Constructor(s)
 
         public ProfileAttributesBinder(
-            IExtendedAttributes<ExtendedAttribute> extendedAttributes,
+            IScopedEntities<ExtendedAttribute> attributes,
             IOperators operators
-        ) : base(extendedAttributes, operators)
+        ) : base(attributes, operators)
         {
         }
 
