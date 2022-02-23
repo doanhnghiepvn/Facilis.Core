@@ -51,6 +51,7 @@ namespace Facilis.Core.Tests.Models
 
         [Immutable]
         public DateTime LastSignInAtUtc { get; set; } = DateTime.UtcNow;
+
         public FileInfo Avatar { get; set; }
         public UserProfile Copy { get; set; }
     }
