@@ -28,7 +28,17 @@ namespace Facilis.Core.EntityFrameworkCore.Models
                 )
                 .Select(key =>
                 {
+                    var attribute = this.GetAttributeOfKey(key);
                     var value = this.ValuesGroupedInKeys[key];
+
+                    if (attribute != null)
+                    {
+                        var valueChanged = value != attribute.Value;
+                        var statusChanged = this.EntityStatus != attribute.Status;
+
+                        if (!valueChanged && !statusChanged) return null;
+                    }
+
                     return new T()
                     {
                         Status = this.EntityStatus,
@@ -42,6 +52,7 @@ namespace Facilis.Core.EntityFrameworkCore.Models
                         Value = value
                     };
                 })
+                .Where(attribute => attribute != null)
                 .ToArray();
         }
 
@@ -53,10 +64,7 @@ namespace Facilis.Core.EntityFrameworkCore.Models
                 )
                 .Select(key =>
                 {
-                    var attribute = Array.Find(
-                        this.Attributes,
-                        attribute => attribute.Key == key
-                    );
+                    var attribute = this.GetAttributeOfKey(key);
                     var value = this.ValuesGroupedInKeys[key];
 
                     var immutable = this.ImmutableKeys.Contains(key);
@@ -76,6 +84,13 @@ namespace Facilis.Core.EntityFrameworkCore.Models
                 })
                 .Where(attribute => attribute != null)
                 .ToArray();
+        }
+
+        private T GetAttributeOfKey(string key)
+        {
+            return this.Attributes
+                .OrderByDescending(attribute => attribute.CreatedAtUtc)
+                .FirstOrDefault(attribute => attribute.Key == key);
         }
     }
 }
