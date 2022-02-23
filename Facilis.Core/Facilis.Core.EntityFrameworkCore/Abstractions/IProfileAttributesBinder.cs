@@ -25,17 +25,12 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
     {
         private List<BindingProfileAttributes<T>> bindingModels { get; } = new();
 
-        private IScopedEntities<T> attributes { get; }
         private IOperators operators { get; }
 
         #region Constructor(s)
 
-        public ProfileAttributesBinder(
-            IScopedEntities<T> attributes,
-            IOperators operators
-        )
+        public ProfileAttributesBinder(IOperators operators)
         {
-            this.attributes = attributes;
             this.operators = operators;
         }
 
@@ -53,19 +48,24 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
                 EntityState.Added,
                 EntityState.Modified,
             };
+
             if (sender is DbContext context)
             {
-                this.Track(context.ChangeTracker
-                    .Entries()
-                    .Where(entry => trackStates.Contains(entry.State))
+                this.Track(
+                    context,
+                    context.ChangeTracker
+                        .Entries()
+                        .Where(entry => trackStates.Contains(entry.State))
                 );
             }
         }
 
         public virtual void DbContextSavedChanges(object sender, SavedChangesEventArgs e)
         {
-            if (this.HasPendingChanges())
+            if (this.HasPendingChanges() && sender is DbContext context)
             {
+                var entities = this.GetScopedEntities(context);
+
                 var newAttributes = new List<T>();
                 var updatingAttributes = new List<T>();
 
@@ -77,21 +77,23 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
 
                 if (newAttributes.Any())
                 {
-                    this.attributes.AddNoSave(newAttributes);
+                    entities.AddNoSave(newAttributes);
                 }
 
                 if (updatingAttributes.Any())
                 {
-                    this.attributes.UpdateNoSave(updatingAttributes);
+                    entities.UpdateNoSave(updatingAttributes);
                 }
 
                 this.Clear();
-                this.attributes.Save();
+                entities.Save();
             }
         }
 
-        protected virtual void Track(IEnumerable<EntityEntry> entries)
+        protected virtual void Track(DbContext context, IEnumerable<EntityEntry> entries)
         {
+            var entities = this.GetScopedEntities(context);
+
             foreach (var tracked in entries)
             {
                 if (tracked.Entity is IEntityWithProfile entity)
@@ -108,7 +110,7 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
                         EntityStatus = ((IEntityWithStatus)entity).Status,
 
                         Scope = scope,
-                        Attributes = this.attributes
+                        Attributes = entities
                             .ChangeScope(scope)
                             .QueryEnabledByScopedId(scopedId)
                             .ToArray(),
@@ -133,6 +135,11 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
             }
         }
 
+        protected virtual IScopedEntities<T> GetScopedEntities(DbContext context)
+        {
+            return new ScopedEntities<T>(context);
+        }
+
         private void Clear()
         {
             this.bindingModels.Clear();
@@ -154,10 +161,7 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
     {
         #region Constructor(s)
 
-        public ProfileAttributesBinder(
-            IScopedEntities<ExtendedAttribute> attributes,
-            IOperators operators
-        ) : base(attributes, operators)
+        public ProfileAttributesBinder(IOperators operators) : base(operators)
         {
         }
 
