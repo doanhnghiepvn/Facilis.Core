@@ -45,10 +45,7 @@ namespace Facilis.Core.Tests
                 SystemOperatorName = nameof(System),
             };
             var attributes = new ScopedEntities<ExtendedAttribute>(context);
-            var profileBinder = new ProfileAttributesBinder(
-                attributes,
-                operators
-            );
+            var profileBinder = new ProfileAttributesBinder(operators);
 
             context.SavingChanges += profileBinder.DbContextSavingChanges;
             context.SavedChanges += profileBinder.DbContextSavedChanges;
