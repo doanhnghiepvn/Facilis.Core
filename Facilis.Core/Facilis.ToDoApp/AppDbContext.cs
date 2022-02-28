@@ -1,4 +1,5 @@
 ﻿using Facilis.Core.Abstractions;
+using Facilis.Core.EntityFrameworkCore.Helpers;
 using Facilis.Core.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
@@ -16,6 +17,13 @@ namespace Facilis.ToDoApp
         }
 
         #endregion Constructor(s)
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            this.UseStringifyEnumColumns(builder);
+        }
     }
 
     public class ToDoItem : IEntityWithId, IEntityWithStatus
