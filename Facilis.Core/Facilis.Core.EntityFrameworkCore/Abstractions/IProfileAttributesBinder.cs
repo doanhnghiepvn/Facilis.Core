@@ -98,7 +98,7 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
             {
                 if (tracked.Entity is IEntityWithProfile entity)
                 {
-                    var profile = entity.Profile;
+                    var profile = entity.UncastedProfile;
                     if (profile == null) continue;
 
                     var scope = $"{entity.GetType().Namespace}.{entity.GetType().Name}";

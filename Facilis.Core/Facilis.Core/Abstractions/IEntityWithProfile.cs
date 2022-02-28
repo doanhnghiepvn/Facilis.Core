@@ -2,11 +2,16 @@
 {
     public interface IEntityWithProfile
     {
-        object Profile { get; }
+        object UncastedProfile { get; }
         string SerializedProfile { get; }
 
         void SetProfile(object profile);
+    }
 
-        T GetProfile<T>();
+    public interface IEntityWithProfile<T> : IEntityWithProfile
+    {
+        T Profile { get; }
+
+        void SetProfile(T profile);
     }
 }
