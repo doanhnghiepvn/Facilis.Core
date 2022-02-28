@@ -29,7 +29,7 @@ namespace Facilis.Core.Tests
             users.Add(user);
 
             // Act
-            var profile = user.GetProfile<UserProfile>();
+            var profile = user.Profile;
             var attributes = this.instances
                 .GetEntities<ExtendedAttribute>()
                 .WhereEnabled(entity => entity.ScopedId == user.Id)

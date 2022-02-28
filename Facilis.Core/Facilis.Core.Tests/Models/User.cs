@@ -8,35 +8,36 @@ using System.Text.Json;
 
 namespace Facilis.Core.Tests.Models
 {
-    public class User : IEntityWithId, IEntityWithStatus, IEntityWithProfile
+    public class User :
+        IEntityWithId,
+        IEntityWithStatus,
+        IEntityWithProfile<UserProfile>
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public StatusTypes Status { get; set; }
 
         [NotMapped]
-        public object Profile { get; set; }
+        public UserProfile Profile => this.GetProfile();
+
+        [NotMapped]
+        public object UncastedProfile => this.Profile;
 
         public string SerializedProfile { get; set; }
 
-        #region Constructor(s)
-
-        public User()
-        {
-            this.Profile = this.GetProfile<UserProfile>();
-        }
-
-        #endregion Constructor(s)
-
-        public T GetProfile<T>()
+        public UserProfile GetProfile()
         {
             return this.SerializedProfile == null ? default :
-                JsonSerializer.Deserialize<T>(this.SerializedProfile);
+                JsonSerializer.Deserialize<UserProfile>(this.SerializedProfile);
         }
 
         public void SetProfile(object profile)
         {
-            this.Profile = profile;
             this.SerializedProfile = JsonSerializer.Serialize(profile);
+        }
+
+        public void SetProfile(UserProfile profile)
+        {
+            this.SetProfile((object)profile);
         }
     }
 
