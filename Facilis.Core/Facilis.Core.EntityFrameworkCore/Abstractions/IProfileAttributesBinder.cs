@@ -25,13 +25,13 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
     {
         private List<BindingProfileAttributes<T>> bindingModels { get; } = new();
 
-        private IOperators operators { get; }
+        private IEntityStampsBinder entityStampsBinder { get; }
 
         #region Constructor(s)
 
-        public ProfileAttributesBinder(IOperators operators)
+        public ProfileAttributesBinder(IEntityStampsBinder entityStampsBinder)
         {
-            this.operators = operators;
+            this.entityStampsBinder = entityStampsBinder;
         }
 
         #endregion Constructor(s)
@@ -103,20 +103,7 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
 
                     var scope = $"{entity.GetType().Namespace}.{entity.GetType().Name}";
                     var scopedId = ((IEntityWithId)entity).Id;
-
-                    var profileAttributes = new BindingProfileAttributes<T>()
-                    {
-                        EntityId = scopedId,
-                        EntityStatus = ((IEntityWithStatus)entity).Status,
-
-                        Scope = scope,
-                        Attributes = entities
-                            .ChangeScope(scope)
-                            .QueryEnabledByScopedId(scopedId)
-                            .ToArray(),
-
-                        Operators = this.operators,
-                    };
+                    var profileAttributes = this.GetAttributes(entities, entity, scope, scopedId);
 
                     foreach (var property in profile.GetType().GetProperties())
                     {
@@ -140,6 +127,28 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
             return new ScopedEntities<T>(context);
         }
 
+        private BindingProfileAttributes<T> GetAttributes(
+            IScopedEntities<T> entities,
+            IEntityWithProfile entity,
+            string scope,
+            string scopedId
+        )
+        {
+            return new BindingProfileAttributes<T>()
+            {
+                EntityId = scopedId,
+                EntityStatus = ((IEntityWithStatus)entity).Status,
+
+                Scope = scope,
+                Attributes = entities
+                    .ChangeScope(scope)
+                    .QueryEnabledByScopedId(scopedId)
+                    .ToArray(),
+
+                EntityStampsBinder = this.entityStampsBinder,
+            };
+        }
+
         private void Clear()
         {
             this.bindingModels.Clear();
@@ -161,7 +170,8 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
     {
         #region Constructor(s)
 
-        public ProfileAttributesBinder(IOperators operators) : base(operators)
+        public ProfileAttributesBinder(IEntityStampsBinder entityStampsBinder)
+            : base(entityStampsBinder)
         {
         }
 

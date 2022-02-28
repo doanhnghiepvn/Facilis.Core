@@ -1,6 +1,5 @@
 ﻿using Facilis.Core.Abstractions;
 using Facilis.Core.Enums;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,7 +14,7 @@ namespace Facilis.Core.EntityFrameworkCore.Models
         public string Scope { get; set; }
         public T[] Attributes { get; set; }
 
-        public IOperators Operators { get; set; }
+        public IEntityStampsBinder EntityStampsBinder { get; set; }
 
         public List<string> ImmutableKeys { get; } = new();
         public Dictionary<string, string> ValuesGroupedInKeys { get; } = new();
@@ -39,18 +38,17 @@ namespace Facilis.Core.EntityFrameworkCore.Models
                         if (!valueChanged && !statusChanged) return null;
                     }
 
-                    return new T()
-                    {
-                        Status = this.EntityStatus,
-                        CreatedBy = this.Operators.GetSystemOperatorName(),
-                        UpdatedBy = this.Operators.GetSystemOperatorName(),
+                    return this.EntityStampsBinder
+                        .BindCreatedBySystem(new T()
+                        {
+                            Status = this.EntityStatus,
 
-                        Scope = this.Scope,
-                        ScopedId = this.EntityId,
+                            Scope = this.Scope,
+                            ScopedId = this.EntityId,
 
-                        Key = key,
-                        Value = value
-                    };
+                            Key = key,
+                            Value = value
+                        });
                 })
                 .Where(attribute => attribute != null)
                 .ToArray();
@@ -75,8 +73,7 @@ namespace Facilis.Core.EntityFrameworkCore.Models
                     if (immutable && !statusChanged) return null;
 
                     attribute.Status = this.EntityStatus;
-                    attribute.UpdatedBy = this.Operators.GetSystemOperatorName();
-                    attribute.UpdatedAtUtc = DateTime.UtcNow;
+                    this.EntityStampsBinder.BindUpdatedBySystem(attribute);
 
                     if (!immutable) attribute.Value = value;
 

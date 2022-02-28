@@ -39,13 +39,13 @@ namespace Facilis.Core.Tests
 
         private static void AutoBindProfile(DbContext context)
         {
-            var operators = new Operators()
+            var entityStampsBinder = new EntityStampsBinder()
             {
-                CurrentOperatorName = nameof(Facilis),
-                SystemOperatorName = nameof(System),
+                CurrentUserIdentifier = nameof(Facilis),
+                SystemOperatorIdentifier = nameof(System),
             };
             var attributes = new ScopedEntities<ExtendedAttribute>(context);
-            var profileBinder = new ProfileAttributesBinder(operators);
+            var profileBinder = new ProfileAttributesBinder(entityStampsBinder);
 
             context.SavingChanges += profileBinder.DbContextSavingChanges;
             context.SavedChanges += profileBinder.DbContextSavedChanges;
