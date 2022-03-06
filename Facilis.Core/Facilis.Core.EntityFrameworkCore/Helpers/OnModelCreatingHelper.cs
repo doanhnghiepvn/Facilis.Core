@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Facilis.Core.EntityFrameworkCore.Helpers
@@ -46,6 +49,22 @@ namespace Facilis.Core.EntityFrameworkCore.Helpers
             }
 
             return context;
+        }
+
+        public static IndexBuilder<T> HasIndex<T>(
+            this ModelBuilder builder,
+            Expression<Func<T, object>> indexExpression
+        ) where T : class
+        {
+            return builder.Entity<T>().HasIndex(indexExpression);
+        }
+
+        public static IndexBuilder<T> HasUniqueIndex<T>(
+            this ModelBuilder builder,
+            Expression<Func<T, object>> indexExpression
+        ) where T : class
+        {
+            return builder.HasIndex<T>(indexExpression).IsUnique();
         }
     }
 }
