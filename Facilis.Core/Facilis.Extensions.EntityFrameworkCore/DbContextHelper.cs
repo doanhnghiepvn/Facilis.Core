@@ -14,6 +14,7 @@ namespace Facilis.Extensions.EntityFrameworkCore
         {
             return services
                 .AddScoped(typeof(IEntities<>), typeof(Entities<>))
+                .AddScoped(typeof(IEntitiesWithId<>), typeof(EntitiesWithId<>))
                 .AddScoped(typeof(IScopedEntities<>), typeof(ScopedEntities<>));
         }
 
