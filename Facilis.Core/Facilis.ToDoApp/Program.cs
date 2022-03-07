@@ -25,7 +25,7 @@ static void Configure(WebApplication app)
 
     using var scope = app.Services.CreateScope();
     scope.ServiceProvider
-        .GetService<DbContext>()
+        .GetRequiredService<DbContext>()
         .Database
         .EnsureCreated();
 

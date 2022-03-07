@@ -3,6 +3,8 @@ using Facilis.Core.EntityFrameworkCore;
 using Facilis.Core.EntityFrameworkCore.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading.Tasks;
 
 namespace Facilis.Extensions.EntityFrameworkCore
 {
@@ -18,31 +20,39 @@ namespace Facilis.Extensions.EntityFrameworkCore
                 .AddScoped(typeof(IScopedEntities<>), typeof(ScopedEntities<>));
         }
 
-        public static IServiceCollection UseProfileAttributesBuilder<TContext, TBinder>(
+        public static IServiceCollection AddProfileAttributesBinder<T>(
             this IServiceCollection services
-        )
-            where TContext : DbContext
-            where TBinder : class, IProfileAttributesBinder
+        ) where T : class, IProfileAttributesBinder
         {
-            return services
-                .AddScoped<IProfileAttributesBinder, TBinder>()
-                .UseProfileAttributesBuilder<TContext>();
+            return services.AddScoped<IProfileAttributesBinder, T>();
         }
 
-        public static IServiceCollection UseProfileAttributesBuilder<T>(
+        public static IServiceCollection AddDefaultProfileAttributesBinder(
             this IServiceCollection services
-        ) where T : DbContext
+        )
         {
-            return services.AddScoped(provider =>
-            {
-                var binder = provider.GetRequiredService<IProfileAttributesBinder>();
-                var context = provider.GetRequiredService<T>();
+            return services.AddProfileAttributesBinder<ProfileAttributesBinder>();
+        }
 
-                context.SavingChanges += binder.DbContextSavingChanges;
-                context.SavedChanges += binder.DbContextSavedChanges;
+        public static void UseProfileAttributesBinder(
+            this DbContext context,
+            IProfileAttributesBinder binder
+        )
+        {
+            context.SavingChanges += binder.DbContextSavingChanges;
+            context.SavedChanges += binder.DbContextSavedChanges;
+        }
 
-                return (DbContext)context;
-            });
+        public static async Task UseProfileAttributesBinder(
+            this IServiceProvider provider,
+            Func<Task> next
+        )
+        {
+            provider.GetRequiredService<DbContext>()
+                .UseProfileAttributesBinder(provider
+                    .GetRequiredService<IProfileAttributesBinder>()
+                );
+            await next();
         }
     }
 }
