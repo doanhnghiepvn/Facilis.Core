@@ -2,6 +2,7 @@
 using Facilis.Core.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -17,6 +18,23 @@ namespace Facilis.Core.EntityFrameworkCore
         }
 
         #endregion Constructor(s)
+
+        public T FindEnabledById(string id)
+        {
+            return this.Rows.FirstOrDefault(entity => entity.Id == id &&
+                entity.Status == StatusTypes.Enabled
+            );
+        }
+
+        public IQueryable<T> WhereEnabledByIds(params string[] ids)
+        {
+            return this.WhereEnabled(entity => ids.Contains(entity.Id));
+        }
+
+        public IQueryable<T> WhereEnabledByIds(IEnumerable<string> ids)
+        {
+            return this.WhereEnabledByIds(ids.ToArray());
+        }
 
         public IQueryable<T> WhereAll(Expression<Func<T, bool>> expression, bool expectDeleted = false)
         {
