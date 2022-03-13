@@ -17,5 +17,17 @@ namespace Facilis.Core.Helpers
                 .WhereEnabled(expression)
                 .Where(entity => entity.UserId == userId);
         }
+
+        public static IQueryable<T> WhereAllByUserId<T>(
+            this IEntities<T> entities,
+            string userId,
+            Expression<Func<T, bool>> expression = null,
+            bool expectDeleted = false
+        ) where T : IEntityWithId, IEntityWithStatus, IUserRelatedEntity
+        {
+            return entities
+                .WhereAll(expression, expectDeleted)
+                .Where(entity => entity.UserId == userId);
+        }
     }
 }
