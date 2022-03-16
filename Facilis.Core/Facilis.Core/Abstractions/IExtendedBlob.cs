@@ -3,7 +3,7 @@ using System;
 
 namespace Facilis.Core.Abstractions
 {
-    public interface IExtendedBlog :
+    public interface IExtendedBlob :
         IEntityWithId,
         IEntityWithStatus,
         IEntityWithCreateStamps,
@@ -14,7 +14,7 @@ namespace Facilis.Core.Abstractions
     {
     }
 
-    public class ExtendedBlog : IExtendedBlog
+    public class ExtendedBlob : IExtendedBlob
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public StatusTypes Status { get; set; }
