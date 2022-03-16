@@ -25,12 +25,17 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
     {
         private List<BindingProfileAttributes<T>> bindingModels { get; } = new();
 
+        private IScopeBuilder scopeBuilder { get; }
         private IEntityStampsBinder entityStampsBinder { get; }
 
         #region Constructor(s)
 
-        public ProfileAttributesBinder(IEntityStampsBinder entityStampsBinder)
+        public ProfileAttributesBinder(
+            IScopeBuilder scopeBuilder,
+            IEntityStampsBinder entityStampsBinder
+        )
         {
+            this.scopeBuilder = scopeBuilder;
             this.entityStampsBinder = entityStampsBinder;
         }
 
@@ -101,7 +106,7 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
                     var profile = entity.UncastedProfile;
                     if (profile == null) continue;
 
-                    var scope = $"{entity.GetType().Namespace}.{entity.GetType().Name}";
+                    var scope = this.scopeBuilder.GetScopeOf(entity);
                     var scopedId = ((IEntityWithId)entity).Id;
                     var profileAttributes = this.GetAttributes(entities, entity, scope, scopedId);
 
@@ -170,8 +175,10 @@ namespace Facilis.Core.EntityFrameworkCore.Abstractions
     {
         #region Constructor(s)
 
-        public ProfileAttributesBinder(IEntityStampsBinder entityStampsBinder)
-            : base(entityStampsBinder)
+        public ProfileAttributesBinder(
+            IScopeBuilder scopeBuilder,
+            IEntityStampsBinder entityStampsBinder
+        ) : base(scopeBuilder, entityStampsBinder)
         {
         }
 
